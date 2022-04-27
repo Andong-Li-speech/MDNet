@@ -1,0 +1,127 @@
+# for loading and saving paths
+[path]
+data_type = "WSJ0-SI84_300h"
+is_checkpoint = true
+is_resume_reload = false
+checkpoint_load_path = "CheckpointPath"
+checkpoint_load_filename = ""
+loss_save_path = "Loss"
+model_best_path = "BestModel"
+logging_path = "Logger"
+
+
+[path.train]
+mix_file_path = "/media/liandong/wsj0_si84_300h/train/mix"
+target_file_path = "/media/liandong/wsj0_si84_300h/train/clean"
+
+[path.val]
+mix_file_path = "/media/liandong/wsj0_si84_300h/dev/mix"
+target_file_path = "/media/liandong/wsj0_si84_300h/dev/clean"
+
+
+[gpu]
+gpu_ids = [0]
+# signal settings before sending into the network
+[signal]
+sr = 16000
+is_chunk = true
+chunk_length = 8.0
+win_size = 0.02
+win_shift = 0.01
+fft_num = 320
+is_variance_norm = true
+is_compress = true
+
+
+# choosed loss function
+[loss_function]
+path = "utils.loss"
+prev_weight = 0.1
+curr_weight = 1.0
+alpha = 0.5
+l_type = "L2"
+[loss_function.stagewise]
+classname = "StagewiseComMagEuclideanLoss"
+[loss_function.com_mag]
+classname = "ComMagEuclideanLoss"
+
+
+# choosed optimizer
+[optimizer]
+name = "adam"
+lr = 5e-4
+beta1 = 0.9
+beta2 = 0.999
+l2 = 1e-7
+gradient_norm = 5.0
+epochs = 60
+halve_lr = true
+early_stop = true
+halve_freq = 2
+early_stop_freq = 3
+print_freq = 1
+metric_options = ["SISNR"]  # only one metric is supported in the current version, chioces: [NB-PESQ, ESTOI]
+
+# reproducibility settings
+[reproducibility]
+seed = 1234
+
+# Dataset
+[dataset]
+[dataset.train]
+json_path = "/media/liandong/wsj0_si84_300h/Json/train"
+batch_size = 8
+is_shuffle = true
+
+[dataset.val]
+json_path = "/media/liandong/wsj0_si84_300h/Json/dev"
+batch_size = 8
+is_shuffle = true
+
+[dataloader]
+[dataloader.train]
+num_workers = 6
+pin_memory = true
+drop_last = false
+shuffle = false
+
+[dataloader.val]
+num_workers = 6
+pin_memory = true
+drop_last = false
+shuffle = false
+
+# network configs
+[net]
+choice="MDNet"
+path = "nets.MDNet"
+classname = "MDNet"
+
+[net.MDNet.args]
+cin = 2
+k1 = [1, 3]
+k2 = [2, 3]
+c = 64
+kd1 = 3
+cd1 = 64
+d_feat = 256
+p = 2
+q = 3
+fft_num = 320
+init_alpha = 0.01
+intra_connect = "cat"
+is_u2 = true
+is_gate = false
+is_causal = true
+compress_type = "sqrt"
+norm_type = "IN"
+fusion_type = "latent"
+
+
+[save]
+loss_filename = "WSJ0-SI84_300h_mdnet_loss.mat"
+best_model_filename = "WSJ0-SI84_300h_mdnet_model.pth"
+checkpoint_filename = "WSJ0-SI84_300h_mdnet_model.pth.tar"
+logger_filename = "WSJ0-SI84_300h_mdnet.txt"
+#tensorboard_filename = "librispeech_taylorbeamformer_mic_linear_mid_target_timvdr_order0_param_nonshared_bf_embedding64_hidnode_64_u2_risqueezed_norm2d_BN_norm1d_BN_causal"
+
